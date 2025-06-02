@@ -11,7 +11,7 @@ const override/*: CSSProperties*/ = {
   // borderColor: "red",
 };
 
-// New: Translation dictionary for Chinese and English
+// Translation dictionary (unchanged from previous solution)
 const translations = {
   zh: {
     welcome: "歡迎",
@@ -78,13 +78,20 @@ const translations = {
 };
 
 function App() {
-  // New: State for current language
+  // State for current language
   const [language, setLanguage] = useState('zh'); // Default to Chinese
-  let time_lang='zh';
-  // New: Function to toggle language
+  // New: State to store dynamic values for re-rendering
+  const [dynamicValues, setDynamicValues] = useState({
+    queuePosition: null,
+    queueTime: null,
+    ranking: null,
+    movingTime: null,
+    remainingChargeTime: null,
+  });
+
+  // Function to toggle language
   const toggleLanguage = () => {
     setLanguage(language === 'zh' ? 'en' : 'zh');
-    time_lang=language;
   };
 
   // Existing code unchanged until noted
@@ -104,7 +111,7 @@ function App() {
 
   let interval;
 
-  const API_BASE_URL = 'https://carparkvercelbackend.vercel.app';
+  const API_BASE_URL = 'https://carparktest3backend.onrender.com';
   const backend = axios.create({
     baseURL: API_BASE_URL,
     timeout: 5000,
@@ -133,8 +140,7 @@ function App() {
     let millis = durationInMillis % 1000;
     let second = (durationInMillis / 1000) % 60;
     let minute = (durationInMillis / (1000 * 60));
-    // Modified: Use translation for time format
-    let time = time_lang === 'zh'
+    let time = language === 'zh'
       ? `${Math.floor(minute)}分鐘 ${Math.floor(second)}秒`
       : `${Math.floor(minute)} min ${Math.floor(second)} sec`;
     return time;
@@ -221,7 +227,6 @@ function App() {
     const carNum_base64 = window.location.pathname.substring(1);
     console.log(carNum_base64);
     setcarNum(atob(carNum_base64));
-    // Modified: Update document title with translated parking space
     document.title = translations[language].parkingSpace.replace('{carNum}', atob(carNum_base64));
     const react_def_app = document.getElementById("react_def_app");
     react_def_app.style.display = "none";
@@ -256,6 +261,12 @@ function App() {
             console.log(`(${params[2]} - ${new Date(Date.now()).getTime()})`);
             document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(time < 0 ? 0 : time);
             queue_endtime = (params[2]);
+            // New: Store dynamic values for language toggle
+            setDynamicValues(prev => ({
+              ...prev,
+              queuePosition: params[1] - 1,
+              queueTime: time < 0 ? 0 : time,
+            }));
             console.log(cookie.load("_id"));
             console.log(cookie.load("_id") === undefined);
             if (cookie.load("_id") === undefined) {
@@ -300,9 +311,22 @@ function App() {
               document.getElementById("You are in ranking X").style.display = "none";
               document.getElementById("waitting_time_has").style.display = "none";
               document.getElementById("Remaining time moving to").style.display = "";
+              // New: Store moving time
+              setDynamicValues(prev => ({
+                ...prev,
+                movingTime: moveing_time < 0 ? 0 : moveing_time,
+                ranking: null,
+              }));
             } else {
               document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(time < 0 ? 0 : time);
               queue_endtime = (params[2]);
+              // New: Store ranking and queue time
+              setDynamicValues(prev => ({
+                ...prev,
+                ranking: params[1],
+                queueTime: time < 0 ? 0 : time,
+                movingTime: null,
+              }));
             }
           }
           if (user_State != InUse) {
@@ -316,6 +340,11 @@ function App() {
             console.log(params);
             charge_endtime = (params[1]);
             document.getElementById("Remaining time").innerHTML = millis_to_time_String(charge_endtime - new Date(Date.now()).getTime());
+            // New: Store remaining charge time
+            setDynamicValues(prev => ({
+              ...prev,
+              remainingChargeTime: charge_endtime - new Date(Date.now()).getTime(),
+            }));
           }
           if (user_State != Finish) {
             console.log("user_State != Finish");
@@ -356,6 +385,11 @@ function App() {
         }
         if (document.getElementById("Remaining time")) {
           document.getElementById("Remaining time").innerHTML = millis_to_time_String(newTime < 0 ? 0 : newTime);
+          // New: Update stored remaining charge time
+          setDynamicValues(prev => ({
+            ...prev,
+            remainingChargeTime: newTime < 0 ? 0 : newTime,
+          }));
         }
       }
       const newTime = queue_endtime - new Date(Date.now()).getTime();
@@ -363,11 +397,21 @@ function App() {
         if (newTime && newTime > 0)
           document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(newTime);
         else document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(0);
+        // New: Update stored queue or moving time
+        setDynamicValues(prev => ({
+          ...prev,
+          [prev.movingTime != null ? 'movingTime' : 'queueTime']: newTime < 0 ? 0 : newTime,
+        }));
       }
       if (document.getElementById("You need to wait x minutes")) {
         if (newTime && newTime > 0)
           document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(newTime);
         else document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(0);
+        // New: Update stored queue time
+        setDynamicValues(prev => ({
+          ...prev,
+          queueTime: newTime < 0 ? 0 : newTime,
+        }));
       }
       if (newTime && newTime < 0 && cookie.load("_id")) {
         if ((
@@ -420,6 +464,54 @@ function App() {
     };
   }, []);
 
+  // New: useEffect to update dynamic text when language changes
+  useEffect(() => {
+    // Update document title
+    const carNum_base64 = window.location.pathname.substring(1);
+    document.title = translations[language].parkingSpace.replace('{carNum}', atob(carNum_base64));
+
+    // Update welcome screen
+    if (document.getElementById("There are x in front") && dynamicValues.queuePosition != null) {
+      document.getElementById("There are x in front").innerHTML = dynamicValues.queuePosition;
+    }
+    if (document.getElementById("You need to wait x minutes") && dynamicValues.queueTime != null) {
+      document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(dynamicValues.queueTime);
+    }
+
+    // Update queuing screen
+    if (document.getElementById("InQueue_state_text")) {
+      document.getElementById("InQueue_state_text").innerHTML = dynamicValues.movingTime != null
+        ? translations[language].moving
+        : translations[language].queuing;
+    }
+    if (document.getElementById("your_queue_num_text")) {
+      document.getElementById("your_queue_num_text").innerHTML = translations[language].yourQueueNum;
+    }
+    if (document.getElementById("You are in ranking X") && dynamicValues.ranking != null) {
+      document.getElementById("You are in ranking X").innerHTML = dynamicValues.ranking;
+    }
+    if (document.getElementById("waitting_time_has")) {
+      document.getElementById("waitting_time_has").innerHTML = translations[language].timeToStartCharging;
+    }
+    if (document.getElementById("Remaining time moving to")) {
+      document.getElementById("Remaining time moving to").innerHTML = translations[language].movingToSpot;
+    }
+    if (document.getElementById("There are x minutes left to start charging")) {
+      const time = dynamicValues.movingTime != null ? dynamicValues.movingTime : dynamicValues.queueTime;
+      if (time != null) {
+        document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(time);
+      }
+    }
+
+    // Update charging screen
+    if (document.getElementById("Remaining time") && dynamicValues.remainingChargeTime != null) {
+      document.getElementById("Remaining time").innerHTML = millis_to_time_String(dynamicValues.remainingChargeTime);
+    }
+
+    // Update total price
+    updateTotalPrice();
+  }, [language, dynamicValues]);
+
   function goto(v) {
     return (a) => {
       console.log(a);
@@ -454,7 +546,6 @@ function App() {
     const chargingTimeSelect = document.getElementById('charging-time');
     const chargingTime = parseInt(chargingTimeSelect.innerHTML);
     const price = chargingTime / 15 * 5;
-    // Modified: Use translated total price text
     totalPrice.textContent = translations[language].totalPrice
       .replace('{chargingTime}', chargingTime)
       .replace('{price}', price);
@@ -552,6 +643,8 @@ function App() {
       document.getElementById('confirmButtons').style.display = '';
       document.getElementById('ExistingUsing_stop_btn').style.display = 'none';
       document.getElementById('chargingTime').style.display = 'none';
+      // New: Update confirm text dynamically
+      document.getElementById('confirmText').textContent = translations[language].confirmStop;
     };
   }
 
@@ -568,6 +661,9 @@ function App() {
       cookie.remove("_id");
       document.getElementById('chargingStopped').style.display = '';
       document.getElementById('thankYouMsg').style.display = '';
+      // New: Update dynamic text
+      document.getElementById('chargingStopped').textContent = translations[language].chargingStopped;
+      document.getElementById('thankYouMsg').textContent = translations[language].thankYou;
     };
   }
 
@@ -580,11 +676,9 @@ function App() {
     };
   }
 
-  // Modified: JSX with translated text and language toggle button
   return (
     <div className="App">
       <header className="App-header">
-        {/* New: Language toggle button */}
         <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
           <button onClick={toggleLanguage}>
             {language === 'zh' ? 'Switch to English' : '切換到中文'}
