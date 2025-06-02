@@ -111,7 +111,7 @@ function App() {
 
   let interval;
 
-  const API_BASE_URL = 'https://carparktest3backend.onrender.com';
+  const API_BASE_URL = 'https://carparkvercelbackend.vercel.app';
   const backend = axios.create({
     baseURL: API_BASE_URL,
     timeout: 5000,
