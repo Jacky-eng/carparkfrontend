@@ -607,8 +607,10 @@ function App() {
     return async () => {
       const cancel_show = document.getElementById("cancel_show");
       const infoRow = document.getElementById("infoRow");
+      const InQueue_state_text = document.getElementById("InQueue_state_text");
       if (isConfirmed) {
         infoRow.style.display = "none";
+        InQueue_state_text.style.display = "none";
         const cancal_response = await backend.post("/cancal", null, {
           params: {
             "_id": cookie.load('_id')
