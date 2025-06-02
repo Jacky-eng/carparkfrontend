@@ -84,6 +84,7 @@ function App() {
   // New: Function to toggle language
   const toggleLanguage = () => {
     setLanguage(language === 'zh' ? 'en' : 'zh');
+    countdown_loop();
   };
 
   // Existing code unchanged until noted
