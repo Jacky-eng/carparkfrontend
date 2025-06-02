@@ -80,11 +80,11 @@ const translations = {
 function App() {
   // New: State for current language
   const [language, setLanguage] = useState('zh'); // Default to Chinese
-
+  let time_lang='zh';
   // New: Function to toggle language
   const toggleLanguage = () => {
     setLanguage(language === 'zh' ? 'en' : 'zh');
-    countdown_loop();
+    time_lang=language;
   };
 
   // Existing code unchanged until noted
@@ -134,7 +134,7 @@ function App() {
     let second = (durationInMillis / 1000) % 60;
     let minute = (durationInMillis / (1000 * 60));
     // Modified: Use translation for time format
-    let time = language === 'zh'
+    let time = time_lang === 'zh'
       ? `${Math.floor(minute)}分鐘 ${Math.floor(second)}秒`
       : `${Math.floor(minute)} min ${Math.floor(second)} sec`;
     return time;
