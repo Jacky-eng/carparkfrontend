@@ -51,7 +51,7 @@ const translations = {
     people: "people ahead",
     youNeedToWait: "You need to wait",
     continue: "Continue",
-    cheapestIndoorParking: "Hong Kong's Cheapest Indoor Parking",
+    cheapestIndoorParking: "The cheapest indoor parking space in Hong Kong",
     chargingTime: "Charging Time:",
     minutes: "(minutes)",
     totalPrice: "Charging for {chargingTime} minutes, total cost is ${price}.",
