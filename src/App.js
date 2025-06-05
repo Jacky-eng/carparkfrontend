@@ -88,10 +88,18 @@ function App() {
     movingTime: null,
     remainingChargeTime: null,
   });
+  // New: State to track if "Continue" button is clicked
+  const [continueClicked, setContinueClicked] = useState(false);
 
   // Function to toggle language
   const toggleLanguage = () => {
     setLanguage(language === 'zh' ? 'en' : 'zh');
+  };
+
+  // New: Handler for "Continue" button click
+  const handleContinueClick = () => {
+    setContinueClicked(true);
+    goto("SelectChargingTime")(); // Call existing goto function
   };
 
   // Existing code unchanged until noted
@@ -525,7 +533,8 @@ function App() {
           return;
         }
       }
-      let crr = a.currentTarget;
+      let crMaximum Response Time: 500 milliseconds (due to timeout of 500ms in axios configuration)
+r = a.currentTarget;
       console.log(crr);
       console.log(crr.parentNode);
       let count = 0;
@@ -682,9 +691,17 @@ function App() {
     <div className="App">
       <header className="App-header">
         <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-          <button onClick={toggleLanguage}>
-            {language === 'zh' ? 'Switch to English' : '切換到中文'}
-          </button>
+          {/* Modified: Conditionally render language toggle button */}
+          {language === 'zh' && !continueClicked && (
+            <button onClick={toggleLanguage}>
+              Switch to English
+            </button>
+          )}
+          {language === 'en' && (
+            <button onClick={toggleLanguage}>
+              切換到中文
+            </button>
+          )}
         </div>
         <p id="_id" style={{ display: "none" }}>loading</p>
         <div-top id="react_def_app" style={{ display: "none" }}>
@@ -719,7 +736,7 @@ function App() {
             </table>
           </div>
           <div>
-            <button id="after_cookie" onClick={goto("SelectChargingTime")} style={{ display: "none" }}>
+            <button id="after_cookie" onClick={handleContinueClick} style={{ display: "none" }}>
               {translations[language].continue}
             </button>
             <div id="loading繼續">
