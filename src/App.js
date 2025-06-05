@@ -90,8 +90,9 @@ function App() {
   });
   // New: State to control visibility of language toggle button
   const [showLanguageButton, setShowLanguageButton] = useState(true);
-
+  
   // Function to toggle language
+  let countdown_loop = () => { console.warn("empty countdown_loop"); };
   const toggleLanguage = () => {
     setLanguage(language === 'zh' ? 'en' : 'zh');
     // New: Hide language button when switching to English
@@ -380,7 +381,7 @@ function App() {
 
     fetchData();
 
-    let countdown_loop = () => { console.warn("empty countdown_loop"); };
+    //let countdown_loop = () => { console.warn("empty countdown_loop"); };
     interval = setInterval(countdown_loop, 0);
     clearInterval(interval);
     let fetched = false;
