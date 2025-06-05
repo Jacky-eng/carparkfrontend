@@ -88,18 +88,16 @@ function App() {
     movingTime: null,
     remainingChargeTime: null,
   });
-  // New: State to track if "Continue" button is clicked
-  const [continueClicked, setContinueClicked] = useState(false);
+  // New: State to control visibility of language toggle button
+  const [showLanguageButton, setShowLanguageButton] = useState(true);
 
   // Function to toggle language
   const toggleLanguage = () => {
     setLanguage(language === 'zh' ? 'en' : 'zh');
-  };
-
-  // New: Handler for "Continue" button click
-  const handleContinueClick = () => {
-    setContinueClicked(true);
-    goto("SelectChargingTime")(); // Call existing goto function
+    // New: Hide language button when switching to English
+    if (language === 'zh') {
+      setShowLanguageButton(false);
+    }
   };
 
   // Existing code unchanged until noted
@@ -546,6 +544,10 @@ function App() {
       console.log(count);
       console.log(crr);
       crr.style.display = "none";
+      // New: Hide language button when "Continue" is clicked and language is Chinese
+      if (crr.id === "welcome" && language === 'zh') {
+        setShowLanguageButton(false);
+      }
     };
   }
 
@@ -689,18 +691,10 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-          {/* Modified: Conditionally render language toggle button */}
-          {language === 'zh' && !continueClicked && (
-            <button onClick={toggleLanguage}>
-              Switch to English
-            </button>
-          )}
-          {language === 'en' && (
-            <button onClick={toggleLanguage}>
-              切換到中文
-            </button>
-          )}
+        <div style={{ position: 'absolute', top: '10px', right: '10px', display: showLanguageButton ? 'block' : 'none' }}>
+          <button onClick={toggleLanguage}>
+            {language === 'zh' ? 'Switch to English' : '切換到中文'}
+          </button>
         </div>
         <p id="_id" style={{ display: "none" }}>loading</p>
         <div-top id="react_def_app" style={{ display: "none" }}>
@@ -735,7 +729,7 @@ function App() {
             </table>
           </div>
           <div>
-            <button id="after_cookie" onClick={handleContinueClick} style={{ display: "none" }}>
+            <button id="after_cookie" onClick={goto("SelectChargingTime")} style={{ display: "none" }}>
               {translations[language].continue}
             </button>
             <div id="loading繼續">
