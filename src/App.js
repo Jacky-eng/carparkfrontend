@@ -384,7 +384,7 @@ function App() {
     clearInterval(interval);
     let fetched = false;
     countdown_loop = () => {
-      if (document.getElementById("SelectChargingTime").style.display == "none") return;
+      if (document.getElementById("SelectChargingTime").style.display != "none") return;
       if (charge_endtime && charge_endtime > 0) {
         const newTime = charge_endtime - new Date(Date.now()).getTime();
         if (newTime <= 0) {
