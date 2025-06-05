@@ -533,8 +533,7 @@ function App() {
           return;
         }
       }
-      let crMaximum Response Time: 500 milliseconds (due to timeout of 500ms in axios configuration)
-r = a.currentTarget;
+      let crr = a.currentTarget;
       console.log(crr);
       console.log(crr.parentNode);
       let count = 0;
