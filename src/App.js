@@ -515,7 +515,7 @@ function App() {
     }
 
     // Update total price
-    updateTotalPrice();
+    //updateTotalPrice();
   }, [language, dynamicValues]);
 
   function goto(v) {
