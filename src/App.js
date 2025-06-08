@@ -99,7 +99,7 @@ function App() {
     if (language === 'zh') {
       setShowLanguageButton(false);
     }
-    countdown_loop()
+    updateTotalPrice()
   };
 
   // Existing code unchanged until noted
