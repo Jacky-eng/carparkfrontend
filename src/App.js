@@ -80,7 +80,7 @@ const translations = {
 function App() {
   // State for current language
   const [language, setLanguage] = useState('zh'); // Default to Chinese
-  // State to store dynamic values for re-rendering
+  // New: State to store dynamic values for re-rendering
   const [dynamicValues, setDynamicValues] = useState({
     queuePosition: null,
     queueTime: null,
@@ -88,18 +88,18 @@ function App() {
     movingTime: null,
     remainingChargeTime: null,
   });
-  // State to control visibility of language toggle button
+  // New: State to control visibility of language toggle button
   const [showLanguageButton, setShowLanguageButton] = useState(true);
-  // New: State for display time, replacing global display_time
-  const [displayTime, setDisplayTime] = useState(15); // Initial value 15
-
+  
   // Function to toggle language
+  let countdown_loop = () => { console.warn("empty countdown_loop"); };
   const toggleLanguage = () => {
     setLanguage(language === 'zh' ? 'en' : 'zh');
-    // Hide language button when switching to English
+    // New: Hide language button when switching to English
     if (language === 'zh') {
       setShowLanguageButton(false);
     }
+    countdown_loop()
   };
 
   // Existing code unchanged until noted
@@ -109,6 +109,7 @@ function App() {
   const minlim = 15;
   const maxlim = 120;
   const time_step = 15;
+  var display_time = 15;
   const FirstTime = 0;
   const InQueue = 1;
   const InUse = 2;
@@ -268,7 +269,7 @@ function App() {
             console.log(`(${params[2]} - ${new Date(Date.now()).getTime()})`);
             document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(time < 0 ? 0 : time);
             queue_endtime = (params[2]);
-            // Store dynamic values for language toggle
+            // New: Store dynamic values for language toggle
             setDynamicValues(prev => ({
               ...prev,
               queuePosition: params[1] - 1,
@@ -318,7 +319,7 @@ function App() {
               document.getElementById("You are in ranking X").style.display = "none";
               document.getElementById("waitting_time_has").style.display = "none";
               document.getElementById("Remaining time moving to").style.display = "";
-              // Store moving time
+              // New: Store moving time
               setDynamicValues(prev => ({
                 ...prev,
                 movingTime: moveing_time < 0 ? 0 : moveing_time,
@@ -327,7 +328,7 @@ function App() {
             } else {
               document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(time < 0 ? 0 : time);
               queue_endtime = (params[2]);
-              // Store ranking and queue time
+              // New: Store ranking and queue time
               setDynamicValues(prev => ({
                 ...prev,
                 ranking: params[1],
@@ -347,7 +348,7 @@ function App() {
             console.log(params);
             charge_endtime = (params[1]);
             document.getElementById("Remaining time").innerHTML = millis_to_time_String(charge_endtime - new Date(Date.now()).getTime());
-            // Store remaining charge time
+            // New: Store remaining charge time
             setDynamicValues(prev => ({
               ...prev,
               remainingChargeTime: charge_endtime - new Date(Date.now()).getTime(),
@@ -380,11 +381,12 @@ function App() {
 
     fetchData();
 
-    let countdown_loop = () => { console.warn("empty countdown_loop"); };
+    //let countdown_loop = () => { console.warn("empty countdown_loop"); };
     interval = setInterval(countdown_loop, 0);
     clearInterval(interval);
     let fetched = false;
     countdown_loop = () => {
+      if (document.getElementById("SelectChargingTime").style.display != "none") return;
       if (charge_endtime && charge_endtime > 0) {
         const newTime = charge_endtime - new Date(Date.now()).getTime();
         if (newTime <= 0) {
@@ -392,7 +394,7 @@ function App() {
         }
         if (document.getElementById("Remaining time")) {
           document.getElementById("Remaining time").innerHTML = millis_to_time_String(newTime < 0 ? 0 : newTime);
-          // Update stored remaining charge time
+          // New: Update stored remaining charge time
           setDynamicValues(prev => ({
             ...prev,
             remainingChargeTime: newTime < 0 ? 0 : newTime,
@@ -404,7 +406,7 @@ function App() {
         if (newTime && newTime > 0)
           document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(newTime);
         else document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(0);
-        // Update stored queue or moving time
+        // New: Update stored queue or moving time
         setDynamicValues(prev => ({
           ...prev,
           [prev.movingTime != null ? 'movingTime' : 'queueTime']: newTime < 0 ? 0 : newTime,
@@ -414,7 +416,7 @@ function App() {
         if (newTime && newTime > 0)
           document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(newTime);
         else document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(0);
-        // Update stored queue time
+        // New: Update stored queue time
         setDynamicValues(prev => ({
           ...prev,
           queueTime: newTime < 0 ? 0 : newTime,
@@ -463,11 +465,6 @@ function App() {
     document.getElementById("chargingStopped").style.color = "white";
     document.getElementById("thankYouMsg").style.color = "white";
 
-    // Initialize charging-time with displayTime
-    const chargingTimeSelect = document.getElementById('charging-time');
-    if (chargingTimeSelect) {
-      chargingTimeSelect.innerHTML = displayTime;
-    }
     updateTotalPrice();
     after_useEffect();
     return () => {
@@ -476,7 +473,7 @@ function App() {
     };
   }, []);
 
-  // useEffect to update dynamic text when language changes
+  // New: useEffect to update dynamic text when language changes
   useEffect(() => {
     // Update document title
     const carNum_base64 = window.location.pathname.substring(1);
@@ -520,15 +517,9 @@ function App() {
       document.getElementById("Remaining time").innerHTML = millis_to_time_String(dynamicValues.remainingChargeTime);
     }
 
-    // Update charging-time with current displayTime
-    const chargingTimeSelect = document.getElementById('charging-time');
-    if (chargingTimeSelect) {
-      chargingTimeSelect.innerHTML = displayTime;
-    }
-
     // Update total price
-    updateTotalPrice();
-  }, [language, dynamicValues, displayTime]); // Added displayTime as dependency
+    //updateTotalPrice();
+  }, [language, dynamicValues]);
 
   function goto(v) {
     return (a) => {
@@ -556,7 +547,7 @@ function App() {
       console.log(count);
       console.log(crr);
       crr.style.display = "none";
-      // Hide language button when "Continue" is clicked and language is Chinese
+      // New: Hide language button when "Continue" is clicked and language is Chinese
       if (crr.id === "welcome" && language === 'zh') {
         setShowLanguageButton(false);
       }
@@ -566,36 +557,31 @@ function App() {
   const updateTotalPrice = () => {
     const totalPrice = document.getElementById('total-price');
     const chargingTimeSelect = document.getElementById('charging-time');
-    const chargingTime = displayTime; // Use displayTime state
+    const chargingTime = parseInt(chargingTimeSelect.innerHTML);
     const price = chargingTime / 15 * 5;
     totalPrice.textContent = translations[language].totalPrice
       .replace('{chargingTime}', chargingTime)
       .replace('{price}', price);
-    if (chargingTimeSelect) {
-      chargingTimeSelect.innerHTML = displayTime; // Ensure charging-time reflects displayTime
-    }
   };
 
   function increasetimeBtn(e) {
     console.log("add_time");
-    console.log(displayTime);
-    if (displayTime < maxlim) {
-      setDisplayTime(prev => prev + 15); // Update state
-    }
-    console.log(displayTime);
+    console.log(display_time);
+    if (display_time < maxlim)
+      display_time += 15;
+    console.log(display_time);
     const chargingTimeSelect = document.getElementById('charging-time');
     console.log(chargingTimeSelect);
-    chargingTimeSelect.innerHTML = displayTime; // Update DOM
+    chargingTimeSelect.innerHTML = display_time;
     updateTotalPrice();
   }
 
   function decreasetimeBtn(e) {
     console.log("sub_time");
-    if (displayTime > minlim) {
-      setDisplayTime(prev => prev - 15); // Update state
-    }
+    if (display_time > minlim)
+      display_time -= 15;
     const chargingTimeSelect = document.getElementById('charging-time');
-    chargingTimeSelect.innerHTML = displayTime; // Update DOM
+    chargingTimeSelect.innerHTML = display_time;
     updateTotalPrice();
   }
 
@@ -672,6 +658,7 @@ function App() {
       document.getElementById('confirmButtons').style.display = '';
       document.getElementById('ExistingUsing_stop_btn').style.display = 'none';
       document.getElementById('chargingTime').style.display = 'none';
+      // New: Update confirm text dynamically
       document.getElementById('confirmText').textContent = translations[language].confirmStop;
     };
   }
@@ -689,6 +676,7 @@ function App() {
       cookie.remove("_id");
       document.getElementById('chargingStopped').style.display = '';
       document.getElementById('thankYouMsg').style.display = '';
+      // New: Update dynamic text
       document.getElementById('chargingStopped').textContent = translations[language].chargingStopped;
       document.getElementById('thankYouMsg').textContent = translations[language].thankYou;
     };
@@ -769,7 +757,7 @@ function App() {
               <tbody>
                 <tr>
                   <td>{translations[language].chargingTime}</td>
-                  <td><p id="charging-time">{displayTime}</p></td>
+                  <td><p id="charging-time">15</p></td>
                   <td>{translations[language].minutes}</td>
                 </tr>
               </tbody>
@@ -821,7 +809,7 @@ function App() {
           <p id="confirmText" style={{ display: "none" }}>{translations[language].confirmStop}</p>
           <div id="confirmButtons" style={{ display: "none" }}>
             <button class="yesBtn" onClick={stopCharging()}>{translations[language].yes}</button>
-            <buttonidd class="noBtn" onClick={cancelStop()}>{translations[language].no}</button>
+            <button class="noBtn" onClick={cancelStop()}>{translations[language].no}</button>
           </div>
           <p id="chargingStopped" style={{ display: "none" }}>{translations[language].chargingStopped}</p>
           <p id="thankYouMsg" style={{ display: "none" }}>{translations[language].thankYou}</p>
