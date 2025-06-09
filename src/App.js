@@ -96,11 +96,13 @@ function App() {
   const toggleLanguage = () => {
     setLanguage(language === 'zh' ? 'en' : 'zh');
     // New: Hide language button when switching to English
-    if (language === 'zh') {
+  if (language === 'zh') {
       setShowLanguageButton(false);
     }
     updateTotalPrice()
   };
+  console.log("updateTotalPrice");
+  console.log(language);
 
   // Existing code unchanged until noted
   function nomal(element) {
