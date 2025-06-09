@@ -559,6 +559,7 @@ function App() {
     const chargingTimeSelect = document.getElementById('charging-time');
     const chargingTime = parseInt(chargingTimeSelect.innerHTML);
     const price = chargingTime / 15 * 5;
+    console.log(language);
     totalPrice.textContent = translations[language].totalPrice
       .replace('{chargingTime}', chargingTime)
       .replace('{price}', price);
