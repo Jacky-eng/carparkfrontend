@@ -146,7 +146,7 @@ function App() {
     }
   }
 
-  function millis_to_time_String(durationInMillis=0,language='zh') {
+  function millis_to_time_String(language,durationInMillis) {
     let millis = durationInMillis % 1000;
     let second = (durationInMillis / 1000) % 60;
     let minute = (durationInMillis / (1000 * 60));
@@ -165,7 +165,7 @@ function App() {
   function after_useEffect() {
     if (useEffect_lock) {
       function eventMT() {
-        console.log(millis_to_time_String(language=language,durationInMillis=Date.now() - last_useEffect));
+        console.log(millis_to_time_String(language,Date.now() - last_useEffect));
         if (cookie.load("_id") === void 0 && Date.now() - last_useEffect < 1500) return;
         else clearInterval(eventMTloop);
         eventSource = new EventSource(`${API_BASE_URL}/events?_id="${cookie.load("_id")}"`);
@@ -270,7 +270,7 @@ function App() {
             document.getElementById("There are x in front").innerHTML = params[1] - 1;
             const time = (params[2] - new Date(Date.now()).getTime());
             console.log(`(${params[2]} - ${new Date(Date.now()).getTime()})`);
-            document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(language=language,durationInMillis=time < 0 ? 0 : time);
+            document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(language,time < 0 ? 0 : time);
             queue_endtime = (params[2]);
             // New: Store dynamic values for language toggle
             setDynamicValues(prev => ({
@@ -315,7 +315,7 @@ function App() {
             const time = (params[2] - new Date(Date.now()).getTime());
             if (params[1] == 1 && params[4] && Date.now() < params[4]) {
               const moveing_time = (params[4] - new Date(Date.now()).getTime());
-              document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(language=language,durationInMillis=moveing_time < 0 ? 0 : moveing_time);
+              document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(language,moveing_time < 0 ? 0 : moveing_time);
               queue_endtime = (params[4]);
               document.getElementById("InQueue_state_text").innerHTML = translations[language].moving;
               document.getElementById("your_queue_num_text").style.display = "none";
@@ -329,7 +329,7 @@ function App() {
                 ranking: null,
               }));
             } else {
-              document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(language=language,durationInMillis=time < 0 ? 0 : time);
+              document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(language,time < 0 ? 0 : time);
               queue_endtime = (params[2]);
               // New: Store ranking and queue time
               setDynamicValues(prev => ({
@@ -350,7 +350,7 @@ function App() {
             console.log("InUse");
             console.log(params);
             charge_endtime = (params[1]);
-            document.getElementById("Remaining time").innerHTML = millis_to_time_String(language=language,durationInMillis=charge_endtime - new Date(Date.now()).getTime());
+            document.getElementById("Remaining time").innerHTML = millis_to_time_String(language,charge_endtime - new Date(Date.now()).getTime());
             // New: Store remaining charge time
             setDynamicValues(prev => ({
               ...prev,
@@ -395,20 +395,20 @@ function App() {
           // redirectToNextPage()
         }
         if (document.getElementById("Remaining time")) {    //Remaining time 係 ExistingUsing入面 ga 野
-          //document.getElementById("Remaining time").innerHTML = millis_to_time_String(language=language,durationInMillis=newTime);
-          document.getElementById("Remaining time").innerHTML = millis_to_time_String(language=language,durationInMillis=newTime < 0 ? 0 : newTime);
+          //document.getElementById("Remaining time").innerHTML = millis_to_time_String(language,newTime);
+          document.getElementById("Remaining time").innerHTML = millis_to_time_String(language,newTime < 0 ? 0 : newTime);
         }
       }
       const newTime = queue_endtime - new Date(Date.now()).getTime();  //queue_endtime=排完隊嘅時間 ; queue_time - nowTime = 距離開始充電時間
       if (document.getElementById("There are x minutes left to start charging")) {
         if (newTime && newTime > 0)
-          document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(language=language,durationInMillis=newTime);
-        else document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(language=language,durationInMillis=0);
+          document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(language,newTime);
+        else document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(language,0);
       }
       if (document.getElementById("You need to wait x minutes")) {
         if (newTime && newTime > 0)
-          document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(language=language,durationInMillis=newTime);
-        else document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(language=language,durationInMillis=0);
+          document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(language,newTime);
+        else document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(language,0);
       }
       if (newTime && newTime < 0 && cookie.load("_id")) {   //if 倒數為0min 0sec 會去database check 資料
         // console.log(cookie.load("_id"));
@@ -485,7 +485,7 @@ function App() {
       document.getElementById("There are x in front").innerHTML = dynamicValues.queuePosition;
     }
     if (document.getElementById("You need to wait x minutes") && dynamicValues.queueTime != null) {
-      document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(language=language,durationInMillis=dynamicValues.queueTime);
+      document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(language,dynamicValues.queueTime);
     }
 
     // Update queuing screen
@@ -509,13 +509,13 @@ function App() {
     if (document.getElementById("There are x minutes left to start charging")) {
       const time = dynamicValues.movingTime != null ? dynamicValues.movingTime : dynamicValues.queueTime;
       if (time != null) {
-        document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(language=language,durationInMillis=time);
+        document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(language,time);
       }
     }
 
     // Update charging screen
     if (document.getElementById("Remaining time") && dynamicValues.remainingChargeTime != null) {
-      document.getElementById("Remaining time").innerHTML = millis_to_time_String(language=language,durationInMillis=dynamicValues.remainingChargeTime);
+      document.getElementById("Remaining time").innerHTML = millis_to_time_String(language,dynamicValues.remainingChargeTime);
     }
 
     // Update total price
