@@ -146,7 +146,7 @@ function App() {
     }
   }
 
-  function millis_to_time_String(durationInMillis,language='zh') {
+  function millis_to_time_String(durationInMillis=0,language='zh') {
     let millis = durationInMillis % 1000;
     let second = (durationInMillis / 1000) % 60;
     let minute = (durationInMillis / (1000 * 60));
