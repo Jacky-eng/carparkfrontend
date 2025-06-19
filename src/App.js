@@ -388,43 +388,29 @@ function App() {
     clearInterval(interval);
     let fetched = false;
     countdown_loop = () => {
-      if (document.getElementById("SelectChargingTime").style.display != "none") return;
       if (charge_endtime && charge_endtime > 0) {
         const newTime = charge_endtime - new Date(Date.now()).getTime();
         if (newTime <= 0) {
           // redirectToNextPage()
         }
-        if (document.getElementById("Remaining time")) {
+        if (document.getElementById("Remaining time")) {    //Remaining time 係 ExistingUsing入面 ga 野
+          //document.getElementById("Remaining time").innerHTML = millis_to_time_String(newTime);
           document.getElementById("Remaining time").innerHTML = millis_to_time_String(newTime < 0 ? 0 : newTime);
-          // New: Update stored remaining charge time
-          setDynamicValues(prev => ({
-            ...prev,
-            remainingChargeTime: newTime < 0 ? 0 : newTime,
-          }));
         }
       }
-      const newTime = queue_endtime - new Date(Date.now()).getTime();
+      const newTime = queue_endtime - new Date(Date.now()).getTime();  //queue_endtime=排完隊嘅時間 ; queue_time - nowTime = 距離開始充電時間
       if (document.getElementById("There are x minutes left to start charging")) {
         if (newTime && newTime > 0)
           document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(newTime);
         else document.getElementById("There are x minutes left to start charging").innerHTML = millis_to_time_String(0);
-        // New: Update stored queue or moving time
-        setDynamicValues(prev => ({
-          ...prev,
-          [prev.movingTime != null ? 'movingTime' : 'queueTime']: newTime < 0 ? 0 : newTime,
-        }));
       }
       if (document.getElementById("You need to wait x minutes")) {
         if (newTime && newTime > 0)
           document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(newTime);
         else document.getElementById("You need to wait x minutes").innerHTML = millis_to_time_String(0);
-        // New: Update stored queue time
-        setDynamicValues(prev => ({
-          ...prev,
-          queueTime: newTime < 0 ? 0 : newTime,
-        }));
       }
-      if (newTime && newTime < 0 && cookie.load("_id")) {
+      if (newTime && newTime < 0 && cookie.load("_id")) {   //if 倒數為0min 0sec 會去database check 資料
+        // console.log(cookie.load("_id"));
         if ((
           (document.getElementById("SelectChargingTime")
             && document.getElementById("SelectChargingTime").style.display == "none")
@@ -437,6 +423,7 @@ function App() {
           &&
           document.getElementById("cancelbtn")
           && document.getElementById("cancelbtn").style.display == ""
+          // !dont_reload
         ) {
           if (!fetched) {
             console.log("fetchData");
@@ -446,8 +433,12 @@ function App() {
         } else
           console.log(
             `don't fetchData
-            ${document.getElementById("SelectChargingTime")}
-            &&${document.getElementById("SelectChargingTime").style.display == "none"}
+            (
+            (${document.getElementById("SelectChargingTime")}
+              && ${document.getElementById("SelectChargingTime").style.display == "none"})
+            || (${document.getElementById("confirmBtn")}
+              && ${document.getElementById("confirmBtn").style.display == "none"})
+            )
             &&
             ${document.getElementById("ExistingUsing_stop_btn")}
             &&${document.getElementById('ExistingUsing_stop_btn').style.display == ''}
@@ -456,8 +447,15 @@ function App() {
             &&${document.getElementById("cancelbtn").style.display == ""}
               `
           );
-        }
-        console.log("interval");
+        // clearInterval(interval);
+      }
+      //queue_endtime = newTime;
+      //return 0;
+
+      console.log("interval")
+      //clearInterval(interval)
+      // Optionally refresh data from backend periodically
+      //fetchData();
     };
     interval = setInterval(countdown_loop, 1000);
     document.getElementById("confirmText").style.display = "none";
