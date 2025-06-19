@@ -150,6 +150,7 @@ function App() {
     let millis = durationInMillis % 1000;
     let second = (durationInMillis / 1000) % 60;
     let minute = (durationInMillis / (1000 * 60));
+    console.log("millis_to_time_String",language)
     let time = language === 'zh'
       ? `${Math.floor(minute)}分鐘 ${Math.floor(second)}秒`
       : `${Math.floor(minute)} min ${Math.floor(second)} sec`;
